@@ -12,11 +12,18 @@ require_relative "./migrate_notes"
 
 DST        = "./migrated"
 ORGTAG     = /:([a-zA-Z\-_]+)/
-UNIQUE_IDS = Hash.new
+UNIQUE_IDS = Set.new
 
 # takes a datetime object and puts out the 14 character ZK id
 def id(datetime)
-  datetime.strftime("%Y%m%d%H%M%S")
+  id = datetime.strftime("%Y%m%d%H%M%S")
+
+  while UNIQUE_IDS.include? id
+    id = (id.to_i + 1).to_s
+  end
+
+  UNIQUE_IDS << id
+  return id
 end
 
 # takes a string, cleans it up.
@@ -52,11 +59,16 @@ end
 # Clean the folder
 Dir.each_child(DST){ |f| File.delete(File.join(DST, f)) }
 
-booknotes(test: true) # FIXME: creates duplicate IDs with itself
-# devotionals() # FIXME: creates duplicate IDs with diary
-# diary() # FIXME: creates duplicate IDs with devotionals
-# links() # FIXME: creates duplicate IDs
-# notes() # FIXME: definitely creates duplicate IDs
+puts "booknotes..."
+booknotes() # FIXME: creates duplicate IDs with itself
+puts "devotionals..."
+devotionals() # FIXME: creates duplicate IDs with diary
+puts "diary..."
+diary() # FIXME: creates duplicate IDs with devotionals
+puts "links..."
+links() # FIXME: creates duplicate IDs
+puts "notes..."
+notes() # FIXME: definitely creates duplicate IDs
 
 puts "Finding duplicates... we need to get this to zero"
 puts "================================================="
