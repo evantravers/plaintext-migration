@@ -1,9 +1,3 @@
-require 'date'
-
-SRC    = "../notes/bible_study/"
-DST    = "./migrated"
-ORGTAG = /:([a-zA-Z\-_]+)/
-
 def render(data)
 %{id: #{data[:id]}
 tags: #{data[:tags]}
@@ -12,84 +6,75 @@ date: #{data[:date]}
 #{data[:body]}}
 end
 
-def id(datetime)
-  datetime.strftime("%Y%m%d%H%M%S")
-end
-
 def clean_body(string)
   string
     .gsub(/^## +\d\d\d\d-\d\d-\d\d\n\n/, "")
     .gsub(/^## \d\d-\d\d-\d\d\d\d\n\n/, "")
 end
 
-def clean_title(string)
-  string
-    .downcase
-    .gsub(/[^a-zA-Z\-]/, "-")
-    .gsub(/-{2,}/, '-')
-end
+def devotionals(opts = {})
+  crawl("../notes/bible_study/").each do |file|
+    filename = File.basename(file)
 
-Dir.foreach(SRC) do |filename|
-  unless ["bible-study.md"].include?(filename)
-    if filename.match?(/.*\.(?:md|txt)/)
-      data    = Hash.new
-      content = File.read(filename)
+    data    = Hash.new
+    content = File.read(file)
 
-      # EXTRACT date from filename and put in metadata
-      datestring =
-        filename
-        .scan(/(\d+)/)
-        .flatten
-        .map{ |n| n.to_i }
+    # EXTRACT date from filename and put in metadata
+    datestring =
+      filename
+      .scan(/(\d+)/)
+      .flatten
+      .map{ |n| n.to_i }
 
-      # handle backwards filenames
-      if datestring.empty?
-        date = File.birthtime(filename)
-      else
-        if datestring[0] < 100
-          datestring = [datestring[2], datestring[0], datestring[1]]
-        end
-
-        date = DateTime.new(*datestring)
+    # handle backwards filenames
+    if datestring.empty?
+      date = File.birthtime(file)
+    else
+      if datestring[0] < 100
+        datestring = [datestring[2], datestring[0], datestring[1]]
       end
 
-      # ADD id to metadata based on date
-      data[:id] = id(date)
-      data[:date] = date.strftime("%a, %e %b %Y %T")
+      date = DateTime.new(*datestring)
+    end
 
-      # EXTRACT tags from /:\w+:/ format and transform to hashtags
-      tags =
-        content
-        .scan(ORGTAG)
-        .flatten
-        .map{ |t| '#' + t.gsub(":", "").gsub('-', '_').downcase }
-        .uniq
+    # ADD id to metadata based on date
+    data[:id] = id(date)
+    data[:date] = date.strftime("%a, %e %b %Y %T")
 
-      content.gsub!(ORGTAG, '\1')
+    # EXTRACT tags from /:\w+:/ format and transform to hashtags
+    tags =
+      content
+      .scan(ORGTAG)
+      .flatten
+      .map{ |t| '#' + t.gsub(":", "").gsub('-', '_').downcase }
+      .uniq
 
-      # ADD tag for #journal
-      tags.push('#journal')
-      tags.push('#devotional')
+    content.gsub!(ORGTAG, '\1')
 
-      data[:tags] = tags.join(', ')
+    # ADD tag for #journal
+    tags.push('#journal')
+    tags.push('#devotional')
 
-      # DETERMINE from first four words
-      if filename.gsub(/\.(?:txt|md)/, '').scan(/[a-zA-Z]+/).empty?
-        title = content.split(' ').filter{|w| w.match(/[a-zA-Z]/)}.take(4).join(' ')
-      else
-        title = filename.gsub(/\.(?:txt|md)/, '')
-      end
+    data[:tags] = tags.join(', ')
 
-      data[:title] = title
-      data[:body] = clean_body(content)
+    # DETERMINE from first four words
+    if filename.gsub(/\.(?:txt|md)/, '').scan(/[a-zA-Z]+/).empty?
+      title = content.split(' ').filter{|w| w.match(/[a-zA-Z]/)}.take(4).join(' ')
+    else
+      title = filename.gsub(/\.(?:txt|md)/, '')
+    end
 
-      # WRITE filename with new filename to a new folder
-      filename = "#{data[:id]}-#{clean_title(title)}.md"
+    data[:title] = title
+    data[:body] = clean_body(content)
+
+    # WRITE filename with new filename to a new folder
+    filename = "#{data[:id]}-#{clean_title(title)}.md"
+    if opts[:test]
       puts filename
       puts render(data)
       puts "\n\n --- \n\n"
+    else
       IO.write(DST + '/' + filename, render(data))
     end
   end
 end
-

@@ -1,9 +1,3 @@
-require 'date'
-
-SRC    = "../diary/"
-DST    = "./migrated"
-ORGTAG = /:([a-zA-Z\-_]+)/
-
 def render(data)
 %{title: #{data[:title]}
 id: #{data[:id]}
@@ -13,21 +7,12 @@ date: #{data[:date]}
 #{data[:body]}}
 end
 
-def id(datetime)
-  datetime.strftime("%Y%m%d%H%M%S")
-end
+def diary(opts = {})
+  crawl("../diary/").each do |file|
+    filename = File.basename(file)
 
-def clean_title(string)
-  string
-    .downcase
-    .gsub(/[^a-zA-Z_]/, "_")
-    .gsub(/_{2,}/, '_')
-end
-
-Dir.foreach(SRC) do |filename|
-  if filename.match?(/.*\.md/)
     data    = Hash.new
-    content = File.read(filename)
+    content = File.read(file)
 
     # EXTRACT date from filename and put in metadata
     datestring =
@@ -69,7 +54,12 @@ Dir.foreach(SRC) do |filename|
 
     # WRITE filename with new filename to a new folder
     filename = "#{data[:id]}-#{clean_title(title)}.md"
-    IO.write(DST + '/' + filename, render(data))
+    if opts[:test]
+      puts filename
+      puts render(data)
+      puts "\n\n --- \n\n"
+    else
+      IO.write(DST + '/' + filename, render(data))
+    end
   end
 end
-
