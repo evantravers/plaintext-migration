@@ -60,15 +60,15 @@ end
 Dir.each_child(DST){ |f| File.delete(File.join(DST, f)) }
 
 puts "booknotes..."
-booknotes() # FIXME: creates duplicate IDs with itself
+booknotes()
 puts "devotionals..."
-devotionals() # FIXME: creates duplicate IDs with diary
+devotionals()
 puts "diary..."
-diary() # FIXME: creates duplicate IDs with devotionals
+diary()
 puts "links..."
-links() # FIXME: creates duplicate IDs
+links()
 puts "notes..."
-notes() # FIXME: definitely creates duplicate IDs
+notes()
 
 puts "Finding duplicates... we need to get this to zero"
 puts "================================================="
