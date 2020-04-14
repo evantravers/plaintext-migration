@@ -11,13 +11,16 @@ def find_duplicate_ids
 
       if history.member? id
         puts "⚠ #{filename} has duplicate IDs in:\n#{history[id].join("\n")}\n\n"
+      end
+
+      if history[id]
+        history[id] << filename
       else
-        if history[id]
-          history[id] << filename
-        else
-          history[id] = [filename]
-        end
+        history[id] = [filename]
       end
     end
   end
+  count = history.keys.select{|k| history[k].size > 1}
+
+  puts "You have #{count.size} with duplicates out of #{Dir.children(DST).size}."
 end
