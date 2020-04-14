@@ -4,7 +4,7 @@ require 'rubygems/text'
 
 include Gem::Text
 
-def render(data)
+def render_book(data)
 if data["subtitle"]
   subtitle = "\nsubtitle: #{data["subtitle"]}"
 else
@@ -36,7 +36,7 @@ def extract_link(string)
 end
 
 def booknotes(opts = {})
-  crawl("../booknotes").each do |file|
+  crawl("../booknotes/").each do |file|
     filename = File.basename(file)
     folder = File.dirname(file)
 
@@ -52,15 +52,15 @@ def booknotes(opts = {})
       date = File.birthtime(path)
     end
 
-    # ADJUST dates (this is _crazy_ lazy, I know)
-    until date.year == File.split(folder).last.to_i
-      puts "Adjusting date... #{date.year}"
-      if date.year > folder.to_i
-        date = date.prev_year
-      else
-        date = date.next_year
-      end
-    end
+    # # ADJUST dates (this is _crazy_ lazy, I know)
+    # until date.year == File.split(folder).last.to_i
+    #   puts "Adjusting date... #{date.year}"
+    #   if date.year > folder.to_i
+    #     date = date.prev_year
+    #   else
+    #     date = date.next_year
+    #   end
+    # end
 
     # ADD id to metadata based on date
     data["id"] = id(date)
@@ -111,9 +111,9 @@ def booknotes(opts = {})
     if opts[:test]
       filename = "#{data["id"]}-#{clean_title("#{data["title"]} by #{mla_authors(data["authors"])}")}.md"
       puts "\n\n>> #{filename} <<\n"
-      puts render(data)
+      puts render_book(data)
     else
-      IO.write(File.join(DST, filename), render(data))
+      IO.write(File.join(DST, filename), render_book(data))
     end
   end
 end

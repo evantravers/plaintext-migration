@@ -1,4 +1,4 @@
-def render(data)
+def render_link(data)
 %{id: #{data[:id]}
 tags: #{data[:tags]}
 date: #{data[:date]}
@@ -86,10 +86,10 @@ def links(opts = {})
       filename = "#{data[:id]}-#{clean_title(title)}.md"
       if opts[:test]
         puts filename + "-----"
-        puts render(data)
+        puts render_link(data)
         puts "\n\n --- \n\n"
       else
-        IO.write(DST + '/' + filename, render(data))
+        IO.write(DST + '/' + filename, render_link(data))
       end
     end
   end

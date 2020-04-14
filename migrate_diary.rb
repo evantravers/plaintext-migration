@@ -1,4 +1,4 @@
-def render(data)
+def render_diary(data)
 %{title: #{data[:title]}
 id: #{data[:id]}
 tags: #{data[:tags]}
@@ -56,10 +56,10 @@ def diary(opts = {})
     filename = "#{data[:id]}-#{clean_title(title)}.md"
     if opts[:test]
       puts filename
-      puts render(data)
+      puts render_diary(data)
       puts "\n\n --- \n\n"
     else
-      IO.write(DST + '/' + filename, render(data))
+      IO.write(DST + '/' + filename, render_diary(data))
     end
   end
 end

@@ -52,11 +52,11 @@ end
 # Clean the folder
 Dir.each_child(DST){ |f| File.delete(File.join(DST, f)) }
 
-booknotes() # FIXME: creates duplicate IDs with itself
-devotionals() # FIXME: creates duplicate IDs with diary
-diary() # FIXME: creates duplicate IDs with devotionals
-links() # FIXME: creates duplicate IDs
-notes() # FIXME: definitely creates duplicate IDs
+booknotes(test: true) # FIXME: creates duplicate IDs with itself
+# devotionals() # FIXME: creates duplicate IDs with diary
+# diary() # FIXME: creates duplicate IDs with devotionals
+# links() # FIXME: creates duplicate IDs
+# notes() # FIXME: definitely creates duplicate IDs
 
 puts "Finding duplicates... we need to get this to zero"
 puts "================================================="

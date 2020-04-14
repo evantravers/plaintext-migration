@@ -1,4 +1,4 @@
-def render(data)
+def render_notes(data)
 %{title: #{data[:title]}
 tags: #{data[:tags]}
 id: #{data[:id]}
@@ -53,9 +53,9 @@ def notes(opts = {})
     filename = "#{data[:id]}-#{clean_title(data[:title])}.md"
     if opts[:test]
       puts "\n\n>> #{filename} <<\n"
-      puts render(data)
+      puts render_notes(data)
     else
-      IO.write(File.join(DST, filename), render(data))
+      IO.write(File.join(DST, filename), render_notes(data))
     end
   end
 end
