@@ -108,8 +108,8 @@ def booknotes(opts = {})
     data["body"] = clean_body(content)
 
     # WRITE filename with new filename to a new folder
+    filename = "#{data["id"]}-#{clean_title("#{data["title"]} by #{mla_authors(data["authors"])}")}.md"
     if opts[:test]
-      filename = "#{data["id"]}-#{clean_title("#{data["title"]} by #{mla_authors(data["authors"])}")}.md"
       puts "\n\n>> #{filename} <<\n"
       puts render_book(data)
     else
