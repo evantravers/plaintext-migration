@@ -7,10 +7,10 @@ def find_duplicate_ids
   Dir.glob("**/*.{txt,md}") do |file|
     if File.dirname(file).include? "migrated"
       filename = File.basename(file)
-      id       = filename.scan(/\d{14}/)[0]
+      id       = filename.scan(/^\d{12}-/)[0]
 
       if history.member? id
-        puts "⚠ #{filename} has duplicate IDs in:\n#{history[id].join("\n")}\n\n"
+        puts "⚠ #{filename} has duplicate IDs in:\n#{history[id].join("\n")}\n\n---\n\n"
       end
 
       if history[id]

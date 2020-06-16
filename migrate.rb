@@ -9,6 +9,7 @@ require_relative "./migrate_devotionals"
 require_relative "./migrate_diary"
 require_relative "./migrate_links"
 require_relative "./migrate_notes"
+require_relative "./migrate_archive"
 
 DST        = "./migrated"
 ORGTAG     = /:([a-zA-Z\-_]+)/
@@ -16,7 +17,7 @@ UNIQUE_IDS = Set.new
 
 # takes a datetime object and puts out the 14 character ZK id
 def id(datetime)
-  id = datetime.strftime("%Y%m%d%H%M%S")
+  id = datetime.strftime("%Y%m%d%H%M")
 
   while UNIQUE_IDS.include? id
     id = (id.to_i + 1).to_s
@@ -57,7 +58,7 @@ def crawl(src)
 end
 
 # Clean the folder
-Dir.each_child(DST){ |f| File.delete(File.join(DST, f)) }
+Dir.each_child(DST){ |f| File.delete(File.join(DST, f)) unless f.match("obsidian") }
 
 puts "booknotes..."
 booknotes()
@@ -69,6 +70,16 @@ puts "links..."
 links()
 puts "notes..."
 notes()
+puts "archive..."
+archive()
+puts "fixing links... (trimming 14 digit IDs to 12 digit)"
+crawl("./migrated").each do |file|
+  content = File.read(file)
+  # The extra 2 in the line before is for the two "[[" characters. ¯\(°_o)/¯
+  content.gsub!(/(?:\[\[)\d{14}/) { |match| match.slice(0, 12 + 2) }
+
+  IO.write(file, content)
+end
 
 puts "Finding duplicates... we need to get this to zero"
 puts "================================================="
