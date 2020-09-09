@@ -1,5 +1,18 @@
 class Zettel
-  attr_accessor(:meta, :body)
+  attr_accessor(:body)
+
+  def initialize()
+    @meta = Hash.new
+    @body = ""
+  end
+
+  def set(key, var)
+    @meta[key.to_sym] = var
+  end
+
+  def get(var)
+    @meta[var]
+  end
 
   def render
     %{
@@ -11,17 +24,9 @@ class Zettel
     }.strip
   end
 
-  def tags
-    @tags.join(", ")
-  end
-
-  def meta(var)
-    @meta[var]
-  end
-
   def render_meta(var)
     %{
-#{var}: #{meta(var)}
+#{var}: #{get(var)}
     }.strip
   end
 
