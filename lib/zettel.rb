@@ -31,7 +31,7 @@ class Zettel
   end
 
   def title
-    meta(:title)
+    get(:title)
   end
 
   def render_title
@@ -47,7 +47,7 @@ class Zettel
   end
 
   def id
-    meta(:id)
+    get(:id)
   end
 
   def render_id
@@ -58,6 +58,20 @@ class Zettel
     @meta.reject{|key, _value| [:title, :tags, :id].include? key }.map do |k, v|
       render_meta(k)
     end.join("\n")
+  end
+
+  def slugify(str)
+    str
+    .downcase
+    .gsub(/[^a-zA-Z0-9\-]/, "-")
+    .gsub(/-{2,}/, '-')
+    .split('-')
+    .take(10)
+    .join('-')
+  end
+
+  def render_filename
+    "#{id}-#{slugify(title)}.md"
   end
 
   def render_metadata

@@ -8,4 +8,8 @@ z.set('tags', ['tag1', 'tag2', '#tag3'])
 z.set('isbn', '0192u319231098')
 z.body = "Call me Ishmael"
 
+puts "<< #{z.render_filename} >>"
 puts z.render
+
+# Pull in each source
+# Build Zettel objects
