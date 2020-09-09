@@ -16,8 +16,12 @@ class Zettel
   end
 
   def meta(var)
+    @meta[var]
+  end
+
+  def render_meta(var)
     %{
-#{var}: #{@meta[var]}
+#{var}: #{meta(var)}
     }.strip
   end
 
@@ -25,26 +29,38 @@ class Zettel
     meta(:title)
   end
 
+  def render_title
+    render_meta(:title)
+  end
+
   def tags
-    "tags: " + @meta[:tags].map{|s| "##{s.gsub('#', '')}"}.join(', ')
+    @meta[:tags].map{|s| "\n  - ##{s.gsub('#', '')}"}.join("")
+  end
+
+  def render_tags
+    "tags: " + tags()
   end
 
   def id
     meta(:id)
   end
 
-  def other
+  def render_id
+    render_meta(:id)
+  end
+
+  def render_other
     @meta.reject{|key, _value| [:title, :tags, :id].include? key }.map do |k, v|
-      meta(k)
+      render_meta(k)
     end.join("\n")
   end
 
   def render_metadata
     %{
-#{title}
-#{tags}
-#{id}
-#{other}
+#{render_title}
+#{render_tags}
+#{render_id}
+#{render_other}
     }.strip
   end
 end
