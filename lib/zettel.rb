@@ -43,7 +43,7 @@ class Zettel
   end
 
   def render_tags
-    "tags: " + tags()
+    "keywords: " + tags()
   end
 
   def id
