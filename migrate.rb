@@ -11,5 +11,12 @@ z.body = "Call me Ishmael"
 puts "<< #{z.render_filename} >>"
 puts z.render
 
-# Pull in each source
+# Pull in each source:
+# - new zk (seems to be split between two folders 😿 )
+# - links
+# - booknotes (include subfolders)
+# - diary
+# - notes (include subfolders)
+
 # Build Zettel objects
+#   For each one, ensure that it has a unique ID compared to the other ones
