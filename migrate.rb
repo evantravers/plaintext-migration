@@ -42,6 +42,19 @@ class Migrator
     end
   end
 
+  def self.ensure_uniqueness(zettel)
+    if @unique_ids.include? zettel.id then
+      # we've got a dup
+      puts "🔴 Duplicate ID! #{zettel.title}: #{zettel.id}"
+
+      zettel.set(:id, zettel.id.to_i + 1)
+      puts "trying #{zettel.id}..."
+      self.ensure_uniqueness(zettel)
+    else
+      @unique_ids << zettel.id
+    end
+  end
+
   def self.old_zettel(opts = {test: true})
     file_crawl('../zk/') do |old_zettel|
 
@@ -79,6 +92,8 @@ class Migrator
       end
 
       z.body = content
+
+      self.ensure_uniqueness(z)
 
       if opts[:test] then
         puts "<< #{z.render_filename()} >>"
