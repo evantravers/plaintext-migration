@@ -38,7 +38,7 @@ class Zettel
 
   def keywords
     if @meta[:keywords]
-      "keywords: " + @meta[:keywords].map{|s| "\n  - ##{s.gsub('#', '')}"}.join()
+      "keywords:" + @meta[:keywords].map{|s| "\n  - ##{s.gsub('#', '')}"}.join()
     end
   end
 
