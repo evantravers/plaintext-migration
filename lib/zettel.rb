@@ -52,11 +52,15 @@ class Zettel
     meta =
       @meta.reject{|key, _value|
         [:title, :keywords, :id].include? key
-      }.map {|k, v|
+      }.map {|k, _v|
         render_meta(k)
       }.join("\n")
 
-    return nil unless meta != ""
+    if meta == ""
+      return nil
+    else
+      return meta
+    end
   end
 
   def slugify(str)
