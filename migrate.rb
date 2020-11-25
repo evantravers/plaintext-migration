@@ -183,10 +183,51 @@ class Migrator
 
       zettel.body = content.strip
 
-      if opts[:test] then
-        puts "<< #{zettel.render_filename()} >>"
-        puts zettel.render()
-      else
+      File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
+    end
+  end
+
+  def diary()
+    file_crawl('../diary/') do |entry|
+      unless
+        [
+          /diary.md/, # hub, unneeded here
+          /2018-02-11/, # generated links file
+          /2018-06-22/, # campus email research
+        ].any?{|pattern| entry.match? pattern } # blocklist
+      then
+        zettel = Zettel.new
+        content = File.read(entry)
+        filename = File.basename(entry)
+
+        datestring =
+          filename
+          .scan(/(\d+)/)
+          .flatten
+          .map{ |n| n.to_i }
+
+        date = DateTime.new(*datestring)
+
+        tags =
+          content
+          .scan(/:([a-zA-Z\-_]+)/)
+          .flatten
+          .map{ |t| '#' + t.gsub(":", "").gsub('-', '_').downcase }
+          .uniq
+
+        tags.push('#journal')
+
+        title = content.match(/^# .*/).to_s.gsub("# ", "")
+
+        if content.match(/^## Notes/) then tags.push('meeting') end
+
+        zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
+        zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
+        zettel.set(:tags, tags)
+        zettel.set(:title, title)
+
+        zettel.body = content
+
         File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
       end
     end
@@ -211,13 +252,13 @@ class Migrator
 
     # Pull in each source:
     # - new zk
-    old_zettel(test: testing)
+    old_zettel()
     # - booknotes (include subfolders)
-    books(test: testing)
+    books()
     # - links
-    links(test: testing)
+    links()
     # - diary
-    # diary = '../diary/'
+    diary()
     # - notes (include subfolders)
     # plaintext = '../notes/'
   end
