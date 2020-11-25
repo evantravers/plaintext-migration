@@ -41,7 +41,6 @@ class Migrator
 
   def old_zettel(opts = {test: true})
     file_crawl('../zk/') do |old_zettel|
-
       zettel = Zettel.new()
       content = File.read(old_zettel)
 
@@ -115,9 +114,8 @@ class Migrator
       end["volumeInfo"]
 
       zettel.set(:title, title)
-
-      zettel.set(:author, book['authors'].join(', '))
-
+      zettel.set(:subtitle, book['subtitle'])
+      zettel.set(:author, book['authors'].join(', ')) # close enough to MLA
       zettel.set(:publisher, book['publisher'])
       zettel.set(:identifer, book["industryIdentifiers"][0]["identifier"])
 
@@ -151,7 +149,7 @@ class Migrator
     # - new zk
     old_zettel(test: testing)
     # - booknotes (include subfolders)
-    # books(test: testing)
+    books(test: testing)
     # - links
     # links = '../links/'
     # - diary
