@@ -2,6 +2,7 @@ require './lib/zettel'
 require 'set'
 require 'net/http'
 require 'json'
+require 'date'
 require 'rubygems/text'
 
 include Gem::Text
@@ -88,22 +89,28 @@ class Migrator
   end
 
   def books(opts = {test: true})
-    file_crawl('../booknotes/') do |book|
-      filename = File.basename(book)
+    file_crawl('../booknotes/') do |booknote|
+      filename = File.basename(booknote)
       zettel = Zettel.new()
-      content = File.read(book)
+      content = File.read(booknote)
 
       title, *content = content.split(/\n/)
       title   = title.gsub(/^#+ /, '')
       content = content.join("\n")
 
-      zettel.set(:keywords, ['book'])
+      zettel.set(:keywords, ['booknote'])
 
       zettel.body = content.strip
 
       query  = filename.gsub(/\..{2,3}$/, '')
       title  = query.split(" by ").first.strip
       author = query.split(" by ").last.strip
+
+      begin
+        date = Date.parse(content)
+      rescue StandardError
+        date = File.birthtime(booknote)
+      end
 
       books =
         JSON.parse(Net::HTTP.get_response(
@@ -112,6 +119,10 @@ class Migrator
       book = books["items"].min_by do |b|
         levenshtein_distance(b["volumeInfo"]["title"], title)
       end["volumeInfo"]
+
+      zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
+      zettel.set(:id, date.strftime("%Y%m%d%H"))
+      ensure_uniqueness(zettel)
 
       zettel.set(:title, title)
       zettel.set(:subtitle, book['subtitle'])
