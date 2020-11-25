@@ -1,48 +1,22 @@
 require './lib/zettel'
 require 'set'
 
-# Writing some tests
-test = Zettel.new
-test.set('id', '20200998955')
-test.set('title', 'If you can read this...')
-test.set('keywords', ['tag1', 'tag2', '#tag3'])
-test.set('isbn', '0192u319231098')
-test.body = "Then the tests are working."
-
-puts "<< #{test.render_filename} >>"
-puts test.render
-
 class Migrator
-  # links = '../links/'
-  # books = '../booknotes/'
-  # diary = '../diary/'
-  # plaintext = '../notes/'
-
-  # - new zk (seems to be split between two folders 😿 )
-  # - links
-  # - booknotes (include subfolders)
-  # - diary
-  # - notes (include subfolders)
-  #
-  # FOR EACH by folder:
-  #   pull in each file
-  #   build the Zettel object
-  #   write it to the new folder
-  #     IO.write('../../wiki/', zettel.render())
-
-  # Build Zettel objects
-  #   For each one, ensure that it has a unique ID compared to the other ones
-
-  @unique_ids = Set.new
   DST = '../../wiki/'
 
-  def self.file_crawl(src)
-    Dir.glob("#{src}**/*.{md,txt}") do |file|
+  def initialize
+    @unique_ids = Set.new
+  end
+
+  def file_crawl(src)
+    search_path = "#{src}**/*.{md,txt}"
+    puts "Found #{Dir.glob(search_path).count} files in #{src}"
+    Dir.glob(search_path) do |file|
       yield file
     end
   end
 
-  def self.ensure_uniqueness(zettel)
+  def ensure_uniqueness(zettel)
     if @unique_ids.include? zettel.id then
       # we've got a dup
       puts "🔴 Duplicate ID! #{zettel.title}: #{zettel.id}"
@@ -51,11 +25,14 @@ class Migrator
       puts "trying #{zettel.id}..."
       self.ensure_uniqueness(zettel)
     else
+      if zettel.id.size != 12 then
+        puts "#{zettel.id} 🟡 ID is too long! #{zettel.title}"
+      end
       @unique_ids << zettel.id
     end
   end
 
-  def self.old_zettel(opts = {test: true})
+  def old_zettel(opts = {test: true})
     file_crawl('../zk/') do |old_zettel|
 
       z = Zettel.new()
@@ -104,15 +81,37 @@ class Migrator
     end
   end
 
-  def self.run(testing=false)
+  def test
+    # Writing some tests
+    test = Zettel.new
+    test.set('id', '20200998955')
+    test.set('title', 'If you can read this...')
+    test.set('keywords', ['tag1', 'tag2', '#tag3'])
+    test.set('isbn', '0192u319231098')
+    test.body = "Then the tests are working."
+
+    puts "<< #{test.render_filename} >>"
+    puts test.render
+  end
+
+  def run(testing=false)
     # clean out the folder
     Dir.each_child(DST){ |f| File.delete(File.join(DST, f)) unless f.match("obsidian") }
 
     # Pull in each source:
+    # - new zk
     old_zettel(test: testing)
+    # - booknotes (include subfolders)
+    # books(test: testing)
+    # - links
+    # links = '../links/'
+    # - diary
+    # diary = '../diary/'
+    # - notes (include subfolders)
+    # plaintext = '../notes/'
   end
 end
 
-Migrator.run()
+migrator = Migrator.new()
 
-
+migrator.run()
