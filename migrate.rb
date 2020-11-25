@@ -104,7 +104,7 @@ class Migrator
         title   = title.gsub(/^#+ /, '')
         content = content.join("\n")
 
-        zettel.set(:keywords, ['booknote'])
+        zettel.set(:keywords, ['booknote', 'book'])
 
         zettel.body = content.strip
 
