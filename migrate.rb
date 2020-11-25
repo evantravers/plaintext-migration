@@ -35,7 +35,7 @@ class Migrator
   def old_zettel(opts = {test: true})
     file_crawl('../zk/') do |old_zettel|
 
-      z = Zettel.new()
+      zettel = Zettel.new()
       content = File.read(old_zettel)
 
       if content.match(/^\w+: .+$/) then
@@ -53,30 +53,30 @@ class Migrator
               key = 'keywords'
               value = value.split(', ')
             end
-            z.set(key, value)
+            zettel.set(key, value)
           }
       end
-      if !z.id then
+      if !zettel.id then
         # try in the filename?
-        z.set('id', old_zettel.scan(/\d{12}-/)[0].gsub('-', ''))
+        zettel.set('id', old_zettel.scan(/\d{12}-/)[0].gsub('-', ''))
       end
 
-      if !z.title then
+      if !zettel.title then
         title, *content = content.split(/\n/)
         title = title.gsub(/^#+ /, '')
-        z.set(:title, title)
+        zettel.set(:title, title)
         content = content.join("\n")
       end
 
-      z.body = content
+      zettel.body = content
 
-      self.ensure_uniqueness(z)
+      self.ensure_uniqueness(zettel)
 
       if opts[:test] then
-        puts "<< #{z.render_filename()} >>"
-        puts z.render()
+        puts "<< #{zettel.render_filename()} >>"
+        puts zettel.render()
       else
-        File.write("#{DST}/#{z.render_filename()}", z.render())
+        File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
       end
     end
   end
