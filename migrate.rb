@@ -15,8 +15,10 @@ class Migrator
 
   def file_crawl(src)
     search_path = "#{src}**/*.{md,txt}"
-    puts "Found #{Dir.glob(search_path).count} files in #{src}"
-    Dir.glob(search_path) do |file|
+    count = Dir.glob(search_path).count
+    puts "## Working #{src}...\n#{Dir.glob(search_path).count} files in #{src}"
+    Dir.glob(search_path).each_with_index do |file, index|
+      puts "[#{index+1}/#{count}]: #{File.basename(file)...}"
       yield file
     end
   end
