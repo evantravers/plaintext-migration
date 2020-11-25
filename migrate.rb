@@ -1,5 +1,10 @@
 require './lib/zettel'
 require 'set'
+require 'net/http'
+require 'json'
+require 'rubygems/text'
+
+include Gem::Text
 
 class Migrator
   DST = '../../wiki/'
@@ -71,6 +76,48 @@ class Migrator
       zettel.body = content
 
       self.ensure_uniqueness(zettel)
+
+      if opts[:test] then
+        puts "<< #{zettel.render_filename()} >>"
+        puts zettel.render()
+      else
+        File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
+      end
+    end
+  end
+
+  def books(opts = {test: true})
+    file_crawl('../booknotes/') do |book|
+      filename = File.basename(book)
+      zettel = Zettel.new()
+      content = File.read(book)
+
+      title, *content = content.split(/\n/)
+      title   = title.gsub(/^#+ /, '')
+      content = content.join("\n")
+
+      zettel.set(:keywords, ['book'])
+
+      zettel.body = content.strip
+
+      query  = filename.gsub(/\..{2,3}$/, '')
+      title  = query.split(" by ").first.strip
+      author = query.split(" by ").last.strip
+
+      books =
+        JSON.parse(Net::HTTP.get_response(
+          URI("https://www.googleapis.com/books/v1/volumes?q=#{URI.encode(query)}")).body)
+
+      book = books["items"].min_by do |b|
+        levenshtein_distance(b["volumeInfo"]["title"], title)
+      end["volumeInfo"]
+
+      zettel.set(:title, title)
+
+      zettel.set(:author, book['authors'].join(', '))
+
+      zettel.set(:publisher, book['publisher'])
+      zettel.set(:identifer, book["industryIdentifiers"][0]["identifier"])
 
       if opts[:test] then
         puts "<< #{zettel.render_filename()} >>"
