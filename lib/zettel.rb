@@ -15,20 +15,12 @@ class Zettel
   end
 
   def render
-    %{
----
-#{render_metadata}
----
-
-#{@body}
-    }.strip
+    ['---', render_metadata(), '---', "", @body]
+      .compact
+      .join("\n")
   end
 
-  def render_meta(var)
-    %{
-#{var}: #{get(var)}
-    }.strip
-  end
+  def render_meta(var) "#{var}: #{get(var)}" end
 
   def title
     get(:title)
@@ -40,14 +32,12 @@ class Zettel
 
   def keywords
     if @meta[:keywords]
-      @meta[:keywords].map{|s| "\n  - ##{s.gsub('#', '')}"}.join()
-    else
-      ""
+      "keywords: " + @meta[:keywords].map{|s| "\n  - ##{s.gsub('#', '')}"}.join()
     end
   end
 
   def render_keywords
-    "keywords: " + keywords()
+    keywords()
   end
 
   def id
@@ -59,9 +49,14 @@ class Zettel
   end
 
   def render_other
-    @meta.reject{|key, _value| [:title, :keywords, :id].include? key }.map do |k, v|
-      render_meta(k)
-    end.join("\n")
+    meta =
+      @meta.reject{|key, _value|
+        [:title, :keywords, :id].include? key
+      }.map {|k, v|
+        render_meta(k)
+      }.join("\n")
+
+    return nil unless meta != ""
   end
 
   def slugify(str)
@@ -79,11 +74,8 @@ class Zettel
   end
 
   def render_metadata
-    %{
-#{render_title}
-#{render_keywords}
-#{render_id}
-#{render_other}
-    }.strip
+    [render_title(), render_keywords(), render_id(), render_other()]
+      .compact
+      .join("\n")
   end
 end
