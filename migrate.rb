@@ -33,8 +33,10 @@ class Migrator
       puts "trying #{zettel.id}..."
       self.ensure_uniqueness(zettel)
     else
-      if zettel.id.size != 12 then
+      if zettel.id.size > 12 then
         puts "#{zettel.id} 🟡 ID is too long! #{zettel.title}"
+      elsif zettel.id.size < 12 then
+        puts "#{zettel.id} 🟡 ID is too short! #{zettel.title}"
       end
       @unique_ids << zettel.id
     end
@@ -90,51 +92,61 @@ class Migrator
 
   def books(opts = {test: true})
     file_crawl('../booknotes/') do |booknote|
-      filename = File.basename(booknote)
-      zettel = Zettel.new()
-      content = File.read(booknote)
+      unless
+        [
+          /The War of Art/, # already has a note
+          /You and Me Forever/,
+          /Fall/,
+          /Deep Work/,
+          /Your Family God's Way/
+        ].any?{|pattern| booknote.match? pattern } # blocklist
+      then
+        filename = File.basename(booknote)
+        zettel = Zettel.new()
+        content = File.read(booknote)
 
-      title, *content = content.split(/\n/)
-      title   = title.gsub(/^#+ /, '')
-      content = content.join("\n")
+        title, *content = content.split(/\n/)
+        title   = title.gsub(/^#+ /, '')
+        content = content.join("\n")
 
-      zettel.set(:keywords, ['booknote'])
+        zettel.set(:keywords, ['booknote'])
 
-      zettel.body = content.strip
+        zettel.body = content.strip
 
-      query  = filename.gsub(/\..{2,3}$/, '')
-      title  = query.split(" by ").first.strip
-      author = query.split(" by ").last.strip
+        query  = filename.gsub(/\..{2,3}$/, '')
+        title  = query.split(" by ").first.strip
+        author = query.split(" by ").last.strip
 
-      begin
-        date = Date.parse(content)
-      rescue StandardError
-        date = File.birthtime(booknote)
-      end
+        begin
+          date = Date.parse(content)
+        rescue StandardError
+          date = File.birthtime(booknote)
+        end
 
-      books =
-        JSON.parse(Net::HTTP.get_response(
-          URI("https://www.googleapis.com/books/v1/volumes?q=#{URI.encode(query)}")).body)
+        books =
+          JSON.parse(Net::HTTP.get_response(
+            URI("https://www.googleapis.com/books/v1/volumes?q=#{URI.encode(query)}")).body)
 
-      book = books["items"].min_by do |b|
-        levenshtein_distance(b["volumeInfo"]["title"], title)
-      end["volumeInfo"]
+        book = books["items"].min_by do |b|
+          levenshtein_distance(b["volumeInfo"]["title"], title)
+        end["volumeInfo"]
 
-      zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
-      zettel.set(:id, date.strftime("%Y%m%d%H"))
-      ensure_uniqueness(zettel)
+        zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
+        zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
+        ensure_uniqueness(zettel)
 
-      zettel.set(:title, title)
-      zettel.set(:subtitle, book['subtitle'])
-      zettel.set(:author, book['authors'].join(', ')) # close enough to MLA
-      zettel.set(:publisher, book['publisher'])
-      zettel.set(:identifer, book["industryIdentifiers"][0]["identifier"])
+        zettel.set(:title, title)
+        zettel.set(:subtitle, book['subtitle'])
+        zettel.set(:author, book['authors'].join(', ')) # close enough to MLA
+        zettel.set(:publisher, book['publisher'])
+        zettel.set(:identifer, book["industryIdentifiers"][0]["identifier"])
 
-      if opts[:test] then
-        puts "<< #{zettel.render_filename()} >>"
-        puts zettel.render()
-      else
-        File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
+        if opts[:test] then
+          puts "<< #{zettel.render_filename()} >>"
+          puts zettel.render()
+        else
+          File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
+        end
       end
     end
   end
