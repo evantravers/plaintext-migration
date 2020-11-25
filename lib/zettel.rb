@@ -50,11 +50,11 @@ class Zettel
 
   def render_other
     meta =
-      @meta.reject{|key, _value|
-        [:title, :keywords, :id].include? key
-      }.map {|k, _v|
-        render_meta(k)
-      }.join("\n")
+      @meta
+      .reject{|key, _value| [:title, :keywords, :id].include? key }
+      .filter{|_k, v| v}
+      .map {|k, _v| render_meta(k)}
+      .join("\n")
 
     if meta == ""
       return nil
