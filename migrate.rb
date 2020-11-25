@@ -42,7 +42,7 @@ class Migrator
     end
   end
 
-  def old_zettel(opts = {test: true})
+  def old_zettel()
     file_crawl('../zk/') do |old_zettel|
       zettel = Zettel.new()
       content = File.read(old_zettel)
@@ -81,16 +81,11 @@ class Migrator
 
       self.ensure_uniqueness(zettel)
 
-      if opts[:test] then
-        puts "<< #{zettel.render_filename()} >>"
-        puts zettel.render()
-      else
-        File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
-      end
+      File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
     end
   end
 
-  def books(opts = {test: true})
+  def books()
     file_crawl('../booknotes/') do |booknote|
       unless
         [
@@ -141,17 +136,12 @@ class Migrator
         zettel.set(:publisher, book['publisher'])
         zettel.set(:identifer, book["industryIdentifiers"][0]["identifier"])
 
-        if opts[:test] then
-          puts "<< #{zettel.render_filename()} >>"
-          puts zettel.render()
-        else
-          File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
-        end
+        File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
       end
     end
   end
 
-  def links(opts = {test: true})
+  def links()
     file_crawl('../links/') do |link|
       zettel = Zettel.new
       content = File.read(link)
@@ -215,7 +205,7 @@ class Migrator
     puts test.render
   end
 
-  def run(testing=false)
+  def run()
     # clean out the folder
     Dir.each_child(DST){ |f| File.delete(File.join(DST, f)) unless f.match("obsidian") }
 
