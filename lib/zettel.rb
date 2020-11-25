@@ -30,6 +30,12 @@ class Zettel
     render_meta(:title)
   end
 
+  def render_aliases
+    if @meta[:title] then
+      "aliases: [\"#{@meta[:title]}\"]"
+    end
+  end
+
   def keywords
     if @meta[:keywords]
       "keywords: " + @meta[:keywords].map{|s| "\n  - ##{s.gsub('#', '')}"}.join()
@@ -78,7 +84,7 @@ class Zettel
   end
 
   def render_metadata
-    [render_title(), render_keywords(), render_id(), render_other()]
+    [render_title(), render_aliases(), render_keywords(), render_id(), render_other()]
       .compact
       .join("\n")
   end
