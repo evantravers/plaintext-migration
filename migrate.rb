@@ -151,6 +151,57 @@ class Migrator
     end
   end
 
+  def links(opts = {test: true})
+    file_crawl('../links/') do |link|
+      zettel = Zettel.new
+      content = File.read(link)
+      filename = File.basename(link)
+
+      datestring =
+        filename
+          .scan(/\w+ \d+, \d\d\d\d/)
+          .flatten
+          .first
+
+      # handle backwards filenames
+      if datestring.nil? || datestring.empty? then
+        date = File.birthtime(link)
+      else
+        date = DateTime.parse(datestring)
+      end
+
+      title = content.lines.reject{|l| l.match(/tags:.*/) || l.strip.empty? }.first.strip
+
+      link = URI.extract(content)
+        .filter{|url| url =~ /\A#{URI::regexp(['http', 'https'])}\z/}
+        .first
+
+      zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
+      zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
+      zettel.set(:keywords, ['link'])
+      zettel.set(:title, title)
+
+      content =
+        content
+          .gsub(/^#{title}$/, '')
+          .gsub(/\w+ \d+, \d\d\d\d at \d\d:\d\d../, "")
+          .gsub(/via Instapaper /, "")
+          .gsub(/^#{URI.regexp}/m, "")
+          .strip
+
+      content = content + "\n\n[#{title}](#{link})"
+
+      zettel.body = content.strip
+
+      if opts[:test] then
+        puts "<< #{zettel.render_filename()} >>"
+        puts zettel.render()
+      else
+        File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
+      end
+    end
+  end
+
   def test
     # Writing some tests
     test = Zettel.new
@@ -174,7 +225,7 @@ class Migrator
     # - booknotes (include subfolders)
     books(test: testing)
     # - links
-    # links = '../links/'
+    links(test: testing)
     # - diary
     # diary = '../diary/'
     # - notes (include subfolders)
