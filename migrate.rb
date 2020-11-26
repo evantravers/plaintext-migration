@@ -45,6 +45,7 @@ class Migrator
   def old_zettel()
     file_crawl('../zk/') do |old_zettel|
       zettel = Zettel.new()
+      zettel.enable_alias = true
       content = File.read(old_zettel)
 
       if content.match(/^\w+: .+$/) then
@@ -98,6 +99,7 @@ class Migrator
       then
         filename = File.basename(booknote)
         zettel = Zettel.new()
+        zettel.enable_alias = true
         content = File.read(booknote)
 
         title, *content = content.split(/\n/)

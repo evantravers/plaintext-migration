@@ -1,8 +1,9 @@
 class Zettel
-  attr_accessor(:body)
+  attr_accessor(:body, :enable_alias)
 
   def initialize()
     @meta = Hash.new
+    @enable_alias = false
     @body = ""
   end
 
@@ -31,7 +32,7 @@ class Zettel
   end
 
   def render_aliases
-    if @meta[:title] then
+    if @meta[:title] && @enable_alias then
       "aliases: [\"#{@meta[:title]}\"]"
     end
   end
