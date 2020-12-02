@@ -37,14 +37,14 @@ class Zettel
     end
   end
 
-  def keywords
-    if @meta[:keywords]
-      "tags: " + @meta[:keywords].map{|s| "##{s.gsub('#', '')}"}.to_s
+  def tags
+    if @meta[:tags]
+      "tags: " + @meta[:tags].map{|s| "##{s.gsub('#', '')}"}.to_s
     end
   end
 
-  def render_keywords
-    keywords()
+  def render_tags
+    tags()
   end
 
   def id
@@ -58,7 +58,7 @@ class Zettel
   def render_other
     meta =
       @meta
-      .reject{|key, _value| [:title, :keywords, :id].include? key }
+      .reject{|key, _value| [:title, :tags, :id].include? key }
       .filter{|_k, v| v}
       .map {|k, _v| render_meta(k)}
       .join("\n")
@@ -85,7 +85,7 @@ class Zettel
   end
 
   def render_metadata
-    [render_title(), render_aliases(), render_keywords(), render_id(), render_other()]
+    [render_title(), render_aliases(), render_tags(), render_id(), render_other()]
       .compact
       .join("\n")
   end
