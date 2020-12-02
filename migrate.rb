@@ -170,7 +170,7 @@ class Migrator
 
       zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
       zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
-      zettel.add_tag('link')
+      zettel.add_tag('links')
       zettel.set(:title, title)
 
       content =
