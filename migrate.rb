@@ -219,7 +219,7 @@ class Migrator
 
         zettel.add_tag('#journal')
 
-        title = content.match(/^# .*/).to_s.gsub("# ", "")
+        title = content.scan(/^#+ .*/).first.to_s.gsub(/^#+ /, "")
 
         if content.match(/^## Notes/) then zettel.add_tag('#meeting') end
 
