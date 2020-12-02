@@ -235,6 +235,88 @@ class Migrator
     end
   end
 
+  def notes()
+    file_crawl('../notes/') do |entry|
+      unless
+        [
+          /bible_study/
+        ].any?{|pattern| entry.match? pattern } # blocklist
+      then
+        zettel = Zettel.new
+        content = File.read(entry)
+        filename = File.basename(entry)
+
+        date = File.ctime(entry)
+
+        tags =
+          content
+          .scan(/:([a-zA-Z\-_]+)/)
+          .flatten
+          .map{ |t| '#' + t.gsub(":", "").gsub('-', '_').downcase }
+          .uniq
+
+        File.dirname(entry)
+          .gsub("../notes", "")
+          .split("/")
+          .reject{ |s| s.empty? }
+          .each { |dir| tags << "##{dir.gsub(" ", "_")}" }
+
+        title = content.match(/^# .*/).to_s.gsub("# ", "")
+
+        if tags == [] then
+          tags = nil
+        end
+
+        title = File.basename(entry, ".*")
+
+        zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
+        zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
+        zettel.set(:tags, tags)
+        zettel.set(:title, title)
+
+        zettel.body = content
+
+        File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
+      end
+    end
+  end
+
+  def bible_study()
+    file_crawl('../notes/bible_study/') do |entry|
+      unless
+        [
+        ].any?{|pattern| entry.match? pattern } # blocklist
+      then
+        zettel = Zettel.new
+        content = File.read(entry)
+        filename = File.basename(entry)
+
+        date = File.ctime(entry)
+
+        tags =
+          content
+          .scan(/:([a-zA-Z\-_]+)/)
+          .flatten
+          .map{ |t| '#' + t.gsub(":", "").gsub('-', '_').downcase }
+          .uniq
+
+        tags << '#journal'
+        tags << '#devotional'
+
+        title = "#{File.basename(entry, ".*")}-devotional"
+
+        zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
+        zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
+        zettel.set(:tags, tags)
+        zettel.set(:title, title)
+
+        zettel.body = content
+
+        File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
+      end
+    end
+  end
+
   def test
     # Writing some tests
     test = Zettel.new
@@ -262,7 +344,9 @@ class Migrator
     # - diary
     diary()
     # - notes (include subfolders)
-    # plaintext = '../notes/'
+    notes()
+    # - devotional notes (created in Byword, there may be duplicates in Diary)
+    bible_study()
   end
 end
 
