@@ -210,22 +210,21 @@ class Migrator
 
         date = DateTime.new(*datestring)
 
-        tags =
-          content
+        content
           .scan(/:([a-zA-Z\-_]+)/)
           .flatten
           .map{ |t| '#' + t.gsub(":", "").gsub('-', '_').downcase }
           .uniq
+          .each{ |tag| zettel.add_tag(tag) }
 
-        tags.push('#journal')
+        zettel.add_tag('#journal')
 
         title = content.match(/^# .*/).to_s.gsub("# ", "")
 
-        if content.match(/^## Notes/) then tags.push('meeting') end
+        if content.match(/^## Notes/) then zettel.add_tag('#meeting') end
 
         zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
         zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
-        zettel.set(:tags, tags)
         zettel.set(:title, title)
 
         zettel.body = content
@@ -248,30 +247,25 @@ class Migrator
 
         date = File.ctime(entry)
 
-        tags =
-          content
+        content
           .scan(/:([a-zA-Z\-_]+)/)
           .flatten
           .map{ |t| '#' + t.gsub(":", "").gsub('-', '_').downcase }
           .uniq
+          .each{ |tag| zettel.add_tag(tag) }
 
         File.dirname(entry)
           .gsub("../notes", "")
           .split("/")
           .reject{ |s| s.empty? }
-          .each { |dir| tags << "##{dir.gsub(" ", "_")}" }
+          .each { |dir| zettel.add_tag("##{dir.gsub(" ", "_")}") }
 
         title = content.match(/^# .*/).to_s.gsub("# ", "")
-
-        if tags == [] then
-          tags = nil
-        end
 
         title = File.basename(entry, ".*")
 
         zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
         zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
-        zettel.set(:tags, tags)
         zettel.set(:title, title)
 
         zettel.body = content
@@ -293,21 +287,20 @@ class Migrator
 
         date = File.ctime(entry)
 
-        tags =
-          content
+        content
           .scan(/:([a-zA-Z\-_]+)/)
           .flatten
           .map{ |t| '#' + t.gsub(":", "").gsub('-', '_').downcase }
           .uniq
+          .each{ |tag| zettel.add_tag(tag) }
 
-        tags << '#journal'
-        tags << '#devotional'
+        zettel.add_tag('journal')
+        zettel.add_tag('devotional')
 
         title = "#{File.basename(entry, ".*")}-devotional"
 
         zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
         zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
-        zettel.set(:tags, tags)
         zettel.set(:title, title)
 
         zettel.body = content

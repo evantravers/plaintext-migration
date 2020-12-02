@@ -37,6 +37,30 @@ class Zettel
     end
   end
 
+  def add_tag(tag)
+    if tag then
+      tag = tag
+            .gsub("#", "")
+            .gsub(" ", "_")
+      unless [
+      ].include? tag then # blacklist
+        tag =
+          case tag
+          when 'pmux'
+            'ux'
+          else
+            tag
+          end
+
+        if @meta[:tags] then
+          @meta[:tags].push(tag)
+        else
+          @meta[:tags] = [tag]
+        end
+      end
+    end
+  end
+
   def tags
     if @meta[:tags]
       "tags: " + @meta[:tags].map{|s| "##{s.gsub('#', '')}"}.to_s
