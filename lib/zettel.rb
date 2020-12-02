@@ -38,24 +38,114 @@ class Zettel
   end
 
   def add_tag(tag)
-    if tag then
+    if tag then # not nil
       tag = tag
             .gsub("#", "")
             .gsub(" ", "_")
-      unless [
-      ].include? tag then # blacklist
-        tag =
-          case tag
-          when 'pmux'
-            'ux'
-          else
-            tag
-          end
 
-        if @meta[:tags] then
-          @meta[:tags].push(tag)
-        else
-          @meta[:tags] = [tag]
+      if
+        !tag.match(/\d+-?/) && # not just a number
+        tag.size > 1 # not a single character
+      then
+
+        # blacklist
+        unless [
+          '_',
+          '19.1',
+          'ls',
+          'bn',
+          'bp',
+          'bd',
+          'gdiff',
+          'vimwiki_list',
+          'p',
+          '_p',
+          '_d',
+          '1-',
+          '2-',
+          '3-',
+          'uab',
+          'responsible',
+          'setforlife',
+          'todos_archived',
+          'wizardsetupstep',
+          'tags',
+          'id',
+          'create_tickets',
+          'http',
+          'before',
+          'comment_tabpanel',
+          'gblame',
+          'first',
+          'study',
+          'calendar_UI',
+          'donut_chat',
+          'blackbox',
+          'wizardchoosestep',
+          'wcw',
+          'usd',
+          'ticket_work',
+          'telegraph',
+          'settings',
+          'hover',
+          'help',
+          'guide',
+          'knowledge_transfer',
+          'formatting',
+          'generate',
+          'archive',
+          'feature',
+          'music',
+          'fixme_link_missing',
+          'active',
+          'button',
+          'cars',
+          'draft',
+          'fixme',
+          'published',
+          'read',
+          'todo',
+        ].include? tag then
+
+          tag =
+            case tag
+            when 'pmux'
+              'ux'
+            when 'interview'
+              'career'
+            when 'project'
+              'projects'
+            when 'book'
+              'books'
+            when 'design_doc'
+              'design'
+            when 'business_economics'
+              'economics'
+            when 'christianlife'
+              'christian_life'
+            when 'code'
+              'programming'
+            when 'fallacy'
+              'fallacies'
+            when 'lesson'
+              'sundayschool'
+            when 'political'
+              'politics'
+            when 'scifi'
+              'sciencefiction'
+            when 'self_help'
+              'selfhelp'
+            when 'social_media'
+              'socialmedia'
+            else
+              tag
+            end
+
+          if @meta[:tags] then
+            @meta[:tags].push(tag)
+          else
+            @meta[:tags] = [tag]
+          end
         end
       end
     end
