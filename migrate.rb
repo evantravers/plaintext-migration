@@ -60,7 +60,6 @@ class Migrator
           .map{|metadata|
             key, value = metadata.scan(/^(\w+): (.*)$/).flatten
             if key == 'tags' then
-              key = 'keywords'
               value = value.split(', ')
             end
             zettel.set(key, value)
@@ -106,7 +105,8 @@ class Migrator
         title   = title.gsub(/^#+ /, '')
         content = content.join("\n")
 
-        zettel.set(:keywords, ['booknote', 'book'])
+        zettel.add_tag('booknote')
+        zettel.add_tag('book')
 
         zettel.body = content.strip
 
@@ -170,7 +170,7 @@ class Migrator
 
       zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
       zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
-      zettel.set(:keywords, ['link'])
+      zettel.add_tag('link')
       zettel.set(:title, title)
 
       content =
@@ -315,7 +315,7 @@ class Migrator
     test = Zettel.new
     test.set('id', '20200998955')
     test.set('title', 'If you can read this...')
-    test.set('keywords', ['tag1', 'tag2', '#tag3'])
+    test.set('tags', ['tag1', 'tag2', '#tag3'])
     test.set('isbn', '0192u319231098')
     test.body = "Then the tests are working."
 
