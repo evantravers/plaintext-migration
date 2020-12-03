@@ -79,7 +79,7 @@ class Migrator
 
       zettel.body = content
 
-      self.ensure_uniqueness(zettel)
+      ensure_uniqueness(zettel)
 
       File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
     end
@@ -169,6 +169,7 @@ class Migrator
         .first
 
       zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
+      ensure_uniqueness(zettel)
       zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
       zettel.add_tag('links')
       zettel.set(:title, title)
@@ -224,6 +225,7 @@ class Migrator
         if content.match(/^## Notes/) then zettel.add_tag('#meeting') end
 
         zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
+      ensure_uniqueness(zettel)
         zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
         zettel.set(:title, title)
 
@@ -265,6 +267,7 @@ class Migrator
         title = File.basename(entry, ".*")
 
         zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
+        ensure_uniqueness(zettel)
         zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
         zettel.set(:title, title)
 
@@ -300,6 +303,7 @@ class Migrator
         title = "#{File.basename(entry, ".*")}-devotional"
 
         zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
+        ensure_uniqueness(zettel)
         zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
         zettel.set(:title, title)
 
