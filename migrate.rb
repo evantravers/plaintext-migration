@@ -121,6 +121,13 @@ class Migrator
           date = File.birthtime(booknote)
         end
 
+        content
+          .scan(/:([a-zA-Z\-_]+):/)
+          .flatten
+          .map{ |t| '#' + t.gsub(":", "").gsub('-', '_').downcase }
+          .uniq
+          .each{ |tag| zettel.add_tag(tag) }
+
         books =
           JSON.parse(Net::HTTP.get_response(
             URI("https://www.googleapis.com/books/v1/volumes?q=#{URI.encode(query)}")).body)
@@ -230,7 +237,7 @@ class Migrator
         date = DateTime.new(*datestring)
 
         content
-          .scan(/:([a-zA-Z\-_]+)/)
+          .scan(/:([a-zA-Z\-_]+):/)
           .flatten
           .map{ |t| '#' + t.gsub(":", "").gsub('-', '_').downcase }
           .uniq
