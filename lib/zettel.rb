@@ -43,6 +43,7 @@ class Zettel
     end
 
     tag = tag
+          .downcase
           .gsub("#", "")
           .gsub(" ", "_")
 
