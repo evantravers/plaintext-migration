@@ -38,118 +38,118 @@ class Zettel
   end
 
   def add_tag(tag)
-    if tag then # not nil
-      tag = tag
-            .gsub("#", "")
-            .gsub(" ", "_")
+    if !tag then # not nil
+      return nil
+    end
 
-      if
-        !tag.match(/\d+-?/) && # not just a number
-        tag.size > 1 # not a single character
-      then
+    tag = tag
+          .gsub("#", "")
+          .gsub(" ", "_")
 
-        # blacklist
-        unless [
-          '_',
-          '19.1',
-          'ls',
-          'bn',
-          'bp',
-          'bd',
-          'gdiff',
-          'vimwiki_list',
-          'p',
-          '_p',
-          '_d',
-          '1-',
-          '2-',
-          '3-',
-          'uab',
-          'responsible',
-          'setforlife',
-          'todos_archived',
-          'wizardsetupstep',
-          'tags',
-          'id',
-          'create_tickets',
-          'http',
-          'before',
-          'comment_tabpanel',
-          'gblame',
-          'first',
-          'study',
-          'calendar_UI',
-          'donut_chat',
-          'blackbox',
-          'wizardchoosestep',
-          'wcw',
-          'usd',
-          'ticket_work',
-          'telegraph',
-          'settings',
-          'hover',
-          'help',
-          'guide',
-          'knowledge_transfer',
-          'formatting',
-          'generate',
-          'archive',
-          'feature',
-          'music',
-          'fixme_link_missing',
-          'active',
-          'button',
-          'cars',
-          'draft',
-          'fixme',
-          'published',
-          'read',
-          'todo',
-        ].include? tag then
+    if
+      tag.match(/\d+-?/) || tag.size == 1 # not a single character or number
+      return nil
+    end
 
-          tag =
-            case tag
-            when 'link'
-              'links'
-            when 'pmux'
-              'ux'
-            when 'interview'
-              'career'
-            when 'project'
-              'projects'
-            when 'book'
-              'books'
-            when 'design_doc'
-              'design'
-            when 'business_economics'
-              'economics'
-            when 'christianlife'
-              'christian_life'
-            when 'code'
-              'programming'
-            when 'fallacy'
-              'fallacies'
-            when 'lesson'
-              'sundayschool'
-            when 'political'
-              'politics'
-            when 'scifi'
-              'sciencefiction'
-            when 'self_help'
-              'selfhelp'
-            when 'social_media'
-              'socialmedia'
-            else
-              tag
-            end
+    # blacklist
+    if [
+      '_',
+      '19.1',
+      'ls',
+      'bn',
+      'bp',
+      'bd',
+      'gdiff',
+      'vimwiki_list',
+      'p',
+      '_p',
+      '_d',
+      '1-',
+      '2-',
+      '3-',
+      'uab',
+      'responsible',
+      'todos_archived',
+      'wizardsetupstep',
+      'tags',
+      'id',
+      'create_tickets',
+      'http',
+      'before',
+      'comment_tabpanel',
+      'etravers',
+      'gblame',
+      'first',
+      'study',
+      'calendar_UI',
+      'donut_chat',
+      'wizardchoosestep',
+      'wcw',
+      'usd',
+      'ticket_work',
+      'settings',
+      'hover',
+      'help',
+      'guide',
+      'knowledge_transfer',
+      'formatting',
+      'generate',
+      'archive',
+      'feature',
+      'music',
+      'fixme_link_missing',
+      'active',
+      'button',
+      'cars',
+      'draft',
+      'fixme',
+      'published',
+      'read',
+      'todo',
+    ].include? tag then
+      return nil
+    end
 
-          if @meta[:tags] then
-            @meta[:tags].push(tag)
-          else
-            @meta[:tags] = [tag]
-          end
-        end
+    tag =
+      case tag
+      when 'link'
+        'links'
+      when 'pmux'
+        'ux'
+      when 'interview'
+        'career'
+      when 'project'
+        'projects'
+      when 'book'
+        'books'
+      when 'design_doc'
+        'design'
+      when 'business_economics'
+        'economics'
+      when 'christianlife'
+        'christian_life'
+      when 'code'
+        'programming'
+      when 'fallacy'
+        'fallacies'
+      when 'lesson'
+        'sundayschool'
+      when 'political'
+        'politics'
+      when 'scifi'
+        'sciencefiction'
+      when 'self_help'
+        'selfhelp'
+      when 'social_media'
+        'socialmedia'
+      else
+        tag
       end
+
+    if @meta[:tags] then
+      @meta[:tags].push(tag).uniq!
+    else
+      @meta[:tags] = [tag]
     end
   end
 
