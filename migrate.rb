@@ -35,9 +35,9 @@ class Migrator
       puts "trying #{zettel.id}..."
       self.ensure_uniqueness(zettel)
     else
-      if zettel.id.size > 12 then
+      if zettel.id.to_s.size > 12 then
         puts "#{zettel.id} 🟡 ID is too long! #{zettel.title}"
-      elsif zettel.id.size < 12 then
+      elsif zettel.id.to_s.size < 12 then
         puts "#{zettel.id} 🟡 ID is too short! #{zettel.title}"
       end
       @unique_ids << zettel.id
