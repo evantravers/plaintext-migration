@@ -100,7 +100,6 @@ class Migrator
       then
         filename = File.basename(booknote)
         zettel = Zettel.new()
-        zettel.enable_alias = true
         content = File.read(booknote)
 
         title, *content = content.split(/\n/)
@@ -134,9 +133,12 @@ class Migrator
         zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
         ensure_uniqueness(zettel)
 
+        authors = book['authors'].join(', ')
+
         zettel.set(:title, title)
+        zettel.set(:aliases, [title, "#{title} by #{authors}"])
         zettel.set(:subtitle, book['subtitle'])
-        zettel.set(:author, book['authors'].join(', ')) # close enough to MLA
+        zettel.set(:author, authors) # close enough to MLA
         zettel.set(:publisher, book['publisher'])
         zettel.set(:identifer, book["industryIdentifiers"][0]["identifier"])
 
