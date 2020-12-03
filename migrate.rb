@@ -62,9 +62,10 @@ class Migrator
           .map{|metadata|
             key, value = metadata.scan(/^(\w+): (.*)$/).flatten
             if key == 'tags' then
-              value = value.split(', ')
+              value.split(', ').each{ |tag| zettel.add_tag(tag) }
+            else
+              zettel.set(key, value)
             end
-            zettel.set(key, value)
           }
       end
       if !zettel.id then
