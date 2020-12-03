@@ -109,6 +109,8 @@ class Zettel
 
           tag =
             case tag
+            when 'link'
+              'links'
             when 'pmux'
               'ux'
             when 'interview'

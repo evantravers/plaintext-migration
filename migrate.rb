@@ -4,6 +4,8 @@ require 'net/http'
 require 'json'
 require 'date'
 require 'rubygems/text'
+require 'net/http'
+require 'nokogiri'
 
 include Gem::Text
 
@@ -144,10 +146,10 @@ class Migrator
   end
 
   def links()
-    file_crawl('../links/') do |link|
+    file_crawl('../links/') do |file|
       zettel = Zettel.new
-      content = File.read(link)
-      filename = File.basename(link)
+      content = File.read(file)
+      filename = File.basename(file)
 
       datestring =
         filename
@@ -157,7 +159,7 @@ class Migrator
 
       # handle backwards filenames
       if datestring.nil? || datestring.empty? then
-        date = File.birthtime(link)
+        date = File.birthtime(file)
       else
         date = DateTime.parse(datestring)
       end
@@ -166,27 +168,41 @@ class Migrator
 
       link = URI.extract(content)
         .filter{|url| url =~ /\A#{URI::regexp(['http', 'https'])}\z/}
-        .first
+        .last
 
-      zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
-      ensure_uniqueness(zettel)
-      zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
-      zettel.add_tag('links')
-      zettel.set(:title, title)
+      if !link then
+        puts "🟡 Missing a link: #{link}"
+      else
+        if link.match(/ift.tt|bit.ly/) then # unshorten links
+          ahrefs = Nokogiri::HTML(
+            Net::HTTP.get_response(URI(link)).body
+          )
+          .css('a')
+          unless link.empty? then
+            link = ahrefs.first['href']
+          end
+        end
 
-      content =
-        content
-          .gsub(/^#{title}$/, '')
-          .gsub(/\w+ \d+, \d\d\d\d at \d\d:\d\d../, "")
-          .gsub(/via Instapaper /, "")
-          .gsub(/^#{URI.regexp}/m, "")
-          .strip
+        zettel.set(:id, date.strftime("%Y%m%d%H%M").ljust(12, "0"))
+        ensure_uniqueness(zettel)
+        zettel.set(:date, date.strftime("%a, %e %b %Y %T"))
+        zettel.add_tag('links')
+        zettel.set(:title, title)
 
-      content = content + "\n\n[#{title}](#{link})"
+        content =
+          content
+            .gsub(/^#{title}$/, '')
+            .gsub(/\w+ \d+, \d\d\d\d at \d\d:\d\d../, "")
+            .gsub(/via Instapaper /, "")
+            .gsub(/^#{URI.regexp}/m, "")
+            .strip
 
-      zettel.body = content.strip
+        content = content + "\n\n[#{title}](#{link})"
 
-      File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
+        zettel.body = content.strip
+
+        File.write("#{DST}/#{zettel.render_filename()}", zettel.render())
+      end
     end
   end
 
