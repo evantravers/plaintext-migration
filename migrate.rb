@@ -348,17 +348,11 @@ class Migrator
     Dir.each_child(DST){ |f| File.delete(File.join(DST, f)) unless f.match("obsidian") }
 
     # Pull in each source:
-    # - new zk
     old_zettel()
-    # - booknotes (include subfolders)
     books()
-    # - links
     links()
-    # - diary
     diary()
-    # - notes (include subfolders)
     notes()
-    # - devotional notes (created in Byword, there may be duplicates in Diary)
     bible_study()
   end
 end
