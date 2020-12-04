@@ -32,7 +32,6 @@ class Migrator
       puts "🔴 Duplicate ID! #{zettel.title}: #{zettel.id}"
 
       zettel.set(:id, zettel.id.to_i + 1)
-      puts "trying #{zettel.id}..."
       self.ensure_uniqueness(zettel)
     else
       if zettel.id.to_s.size > 12 then
