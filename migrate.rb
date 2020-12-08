@@ -354,7 +354,7 @@ class Migrator
 
   def run()
     # clean out the folder
-    Dir.each_child(DST){ |f| File.delete(File.join(DST, f)) unless f.match("obsidian") }
+    # Dir.each_child(DST){ |f| File.delete(File.join(DST, f)) unless f.match("obsidian") }
 
     # Pull in each source:
     old_zettel()
